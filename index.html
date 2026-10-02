@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华为风格计算器</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --display-bg: #2c2c2c;
+            --btn-num-bg: #3a3a3a;
+            --btn-num-hover: #4a4a4a;
+            --btn-op-bg: #252525; /* 运算符背景较深 */
+            --btn-op-hover: #353535;
+            --btn-func-bg: #2b2b2b; /* 功能键 */
+            --text-white: #ffffff;
+            --text-gray: #999999;
+            --accent-orange: #ff9f0a;
+            --btn-eq-bg: #ff9f0a;
+            --btn-eq-hover: #ffb74d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #121212;
+        }
+
+        .calculator {
+            width: 360px;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* 显示屏区域 */
+        .display-container {
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+
+        .history {
+            color: var(--text-gray);
+            font-size: 16px;
+            min-height: 24px;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .current-input {
+            color: var(--text-white);
+            font-size: 48px;
+            font-weight: 300;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+
+        /* 按钮网格 */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 60px;
+            border: none;
+            border-radius: 30px; /* 胶囊形状或大圆角 */
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 数字键 */
+        .btn-num {
+            background-color: var(--btn-num-bg);
+            color: var(--text-white);
+        }
+        .btn-num:hover {
+            background-color: var(--btn-num-hover);
+        }
+        .btn-num:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+
+        /* 运算符 (右侧) */
+        .btn-op {
+            background-color: var(--btn-op-bg);
+            color: var(--accent-orange);
+            font-size: 24px;
+        }
+        .btn-op:hover {
+            background-color: var(--btn-op-hover);
+        }
+        .btn-op:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+
+        /* 顶部功能键 (AC, +/-, %) */
+        .btn-func {
+            background-color: var(--btn-func-bg);
+            color: var(--text-gray);
+        }
+        .btn-func:hover {
+            background-color: #3a3a3a;
+            color: var(--text-white);
+        }
+
+        /* 等号键 */
+        .btn-eq {
+            background-color: var(--btn-eq-bg);
+            color: white;
+            font-size: 24px;
+        }
+        .btn-eq:hover {
+            background-color: var(--btn-eq-hover);
+        }
+        .btn-eq:active {
+            transform: scale(0.95);
+        }
+
+        /* 零键占两格 */
+        .span-two {
+            grid-column: span 2;
+            text-align: left;
+            padding-left: 25px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <div class="display-container">
+        <div class="history" id="history"></div>
+        <div class="current-input" id="display">0</div>
+    </div>
+
+    <div class="buttons">
+        <!-- 第一行 -->
+        <button class="btn-func" onclick="clearAll()">AC</button>
+        <button class="btn-func" onclick="toggleSign()">+/-</button>
+        <button class="btn-func" onclick="percentage()">%</button>
+        <button class="btn-op" onclick="setOperator('/')">÷</button>
+
+        <!-- 第二行 -->
+        <button class="btn-num" onclick="appendNumber('7')">7</button>
+        <button class="btn-num" onclick="appendNumber('8')">8</button>
+        <button class="btn-num" onclick="appendNumber('9')">9</button>
+        <button class="btn-op" onclick="setOperator('*')">×</button>
+
+        <!-- 第三行 -->
+        <button class="btn-num" onclick="appendNumber('4')">4</button>
+        <button class="btn-num" onclick="appendNumber('5')">5</button>
+        <button class="btn-num" onclick="appendNumber('6')">6</button>
+        <button class="btn-op" onclick="setOperator('-')">−</button>
+
+        <!-- 第四行 -->
+        <button class="btn-num" onclick="appendNumber('1')">1</button>
+        <button class="btn-num" onclick="appendNumber('2')">2</button>
+        <button class="btn-num" onclick="appendNumber('3')">3</button>
+        <button class="btn-op" onclick="setOperator('+')">+</button>
+
+        <!-- 第五行 -->
+        <button class="btn-num span-two" onclick="appendNumber('0')">0</button>
+        <button class="btn-num" onclick="appendDot()">.</button>
+        <button class="btn-eq" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    let currentInput = '0';
+    let previousInput = '';
+    let operator = null;
+    let shouldResetScreen = false;
+
+    const displayElement = document.getElementById('display');
+    const historyElement = document.getElementById('history');
+
+    function updateDisplay() {
+        // 格式化数字显示，避免过长溢出
+        let displayValue = currentInput;
+        
+        // 简单的格式化：如果数字太长，缩小字体或截断
+        if (displayValue.length > 12) {
+            displayElement.style.fontSize = '32px';
+        } else {
+            displayElement.style.fontSize = '48px';
+        }
+        
+        displayElement.innerText = displayValue;
+    }
+
+    function appendNumber(number) {
+        if (currentInput === '0' || shouldResetScreen) {
+            currentInput = number;
+            shouldResetScreen = false;
+        } else {
+            currentInput += number;
+        }
+        updateDisplay();
+    }
+
+    function appendDot() {
+        if (shouldResetScreen) {
+            currentInput = '0.';
+            shouldResetScreen = false;
+            updateDisplay();
+            return;
+        }
+        if (!currentInput.includes('.')) {
+            currentInput += '.';
+        }
+        updateDisplay();
+    }
+
+    function clearAll() {
+        currentInput = '0';
+        previousInput = '';
+        operator = null;
+        historyElement.innerText = '';
+        updateDisplay();
+    }
+
+    function toggleSign() {
+        if (currentInput === '0') return;
+        if (currentInput.startsWith('-')) {
+            currentInput = currentInput.substring(1);
+        } else {
+            currentInput = '-' + currentInput;
+        }
+        updateDisplay();
+    }
+
+    function percentage() {
+        if (currentInput === '0') return;
+        currentInput = (parseFloat(currentInput) / 100).toString();
+        updateDisplay();
+    }
+
+    function setOperator(selectedOp) {
+        if (operator !== null && !shouldResetScreen) {
+            calculate();
+        }
+        previousInput = currentInput;
+        operator = selectedOp;
+        shouldResetScreen = true;
+        
+        // 显示历史记录，例如 "5 +"
+        historyElement.innerText = `${formatNumber(previousInput)} ${getSymbol(operator)}`;
+    }
+
+    function getSymbol(op) {
+        switch(op) {
+            case '*': return '×';
+            case '/': return '÷';
+            case '+': return '+';
+            case '-': return '−';
+            default: return op;
+        }
+    }
+
+    function calculate() {
+        if (operator === null || shouldResetScreen) return;
+        
+        let result;
+        const prev = parseFloat(previousInput);
+        const current = parseFloat(currentInput);
+
+        if (isNaN(prev) || isNaN(current)) return;
+
+        switch (operator) {
+            case '+':
+                result = prev + current;
+                break;
+            case '-':
+                result = prev - current;
+                break;
+            case '*':
+                result = prev * current;
+                break;
+            case '/':
+                if (current === 0) {
+                    currentInput = '错误';
+                    operator = null;
+                    previousInput = '';
+                    updateDisplay();
+                    return;
+                }
+                result = prev / current;
+                break;
+            default:
+                return;
+        }
+
+        // 处理浮点数精度问题 (例如 0.1 + 0.2)
+        result = Math.round(result * 10000000000) / 10000000000;
+        
+        currentInput = result.toString();
+        operator = null;
+        historyElement.innerText = ''; // 清空历史显示结果
+        shouldResetScreen = true;
+        updateDisplay();
+    }
+
+    function formatNumber(numStr) {
+        // 可选：添加千分位逗号，但华为计算器通常不自动加逗号直到按下等号
+        // 这里保持简洁，不做额外格式化以免干扰输入
+        return numStr;
+    }
+
+    // 键盘支持
+    document.addEventListener('keydown', (event) => {
+        const key = event.key;
+        if (/[0-9]/.test(key)) appendNumber(key);
+        if (key === '.') appendDot();
+        if (key === 'Enter' || key === '=') calculate();
+        if (key === 'Backspace') {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay();
+        }
+        if (key === 'Escape') clearAll();
+        if (key === '+') setOperator('+');
+        if (key === '-') setOperator('-');
+        if (key === '*') setOperator('*');
+        if (key === '/') {
+            event.preventDefault();
+            setOperator('/');
+        }
+    });
+</script>
+
+</body>
+</html>
